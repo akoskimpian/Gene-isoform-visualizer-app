@@ -7,16 +7,18 @@ library(shinycssloaders)
 
 ui <- fillPage(
   titlePanel("Gene Isoform Explorer", windowTitle = "Gene Isoform Visualization"),
+  # Input: gene and load button
   fluidRow(
     column(12, align = "center",
            div(style = "max-width: 400px; margin: 0 auto;",
-               textInput("gene", "Enter Gene Symbol:", value = "TP53", width = "100%")
+               textInput("gene", "Enter Gene Name:", value = "TP53", width = "100%")
            ),
            actionButton("load", "Load Data", class = "btn-primary",
                         icon = icon("dna"))
     )
   ),
   tabsetPanel(
+    # First tab: visualisation of isoforms
     tabPanel("Gene Visualization",  
              div(
                style = "height: 700px; overflow-y: auto; padding: 10px;",
@@ -26,12 +28,13 @@ ui <- fillPage(
                )
              )
     ),
+    # Second tab: transcript/exon data and download button
     tabPanel("Transcript Data",  
              div(
                downloadButton("downloadData", "Download Exon Data",
                               class = "btn-success",
                               icon = icon("download")),
-               div(style = "margin-bottom: 12px;"),  # ← adds spacing between button and table
+               div(style = "margin-bottom: 12px;"),
                withSpinner(DTOutput("table"), type = 6, color = "#4a90e2")
              )
     )
@@ -41,6 +44,7 @@ ui <- fillPage(
 
 
 server <- function(input, output, session) {
+  # Loading data in
   isoform_data <- eventReactive(input$load, {
     req(input$gene)
     
@@ -63,8 +67,10 @@ server <- function(input, output, session) {
         mart = mart
       )
       
+      # Show error if nothing found
       validate(need(nrow(transcripts) > 0, "No transcripts found for this gene symbol."))
       
+      # Creating final version of data table
       transcripts %>%
         mutate(
           chromosome = paste0("chr", chromosome_name),
@@ -83,9 +89,9 @@ server <- function(input, output, session) {
         ) %>%
         arrange(ensembl_transcript_id, exon_rank)
       
+      # If error, notifies and returns an empty df
     }, error = function(e) {
       showNotification(paste("Error:", e$message), type = "error")
-      # Return empty dataframe with correct columns
       return(data.frame(
         ensembl_transcript_id = character(),
         external_gene_name = character(),
@@ -99,6 +105,7 @@ server <- function(input, output, session) {
     })
   })
   
+  # Download data as .csv
   output$downloadData <- downloadHandler(
     filename = function() paste(input$gene, "_exons.csv", sep = ""),
     content = function(file) {
@@ -107,6 +114,7 @@ server <- function(input, output, session) {
     }
   )
   
+  # Plotting gene isoforms
   output$plot <- renderPlot({
     df <- isoform_data()
     req(nrow(df) > 0)
