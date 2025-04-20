@@ -15,7 +15,7 @@ Whenever I needed to download data from Ensembl, I often felt confused by the ma
 
 ## Why it is not online
 
-Unfortunately, I couldn't successfully deploy the app to [shinyapps.io](https://www.shinyapps.io). This is most likely due to the memory limitations of the free tier, especially when querying large datasets live from Ensembl. I also attempted to make the app use a pre-saved, full Ensembl dataset, but this approach didn't work either.
+Unfortunately, I couldn't successfully deploy the app to [shinyapps.io](https://www.shinyapps.io). This is most likely due to the memory limitations of the free tier, which may be a problem when querying large datasets live from Ensembl. I also attempted to make the app use a pre-saved, full Ensembl dataset, but this approach didn't work either.
 
 **For this reason, the app needs to be run locally.**
 
